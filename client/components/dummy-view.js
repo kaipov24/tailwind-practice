@@ -1,15 +1,41 @@
-import React from 'react'
-import Head from './head'
+import React, { useState, useEffect } from 'react'
+import ImageCard from './ImageCard'
+import ImageSearch from './ImageSearch'
 
 const Dummy = () => {
+  const [images, setImages] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [term, setTerm] = useState('')
+
+  useEffect(() => {
+    fetch(
+      `https://pixabay.com/api/?key=17876772-0e29ef8b5c6eaae6244eba52c&q=${term}&image_type=photo&pretty=true`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setImages(data.hits)
+        setIsLoading(false)
+      })
+      .catch((err) => console.log(err))
+  }, [term])
+
   return (
-    <div>
-      <Head title="Hello" />
-      <div className="flex items-center justify-center h-screen">
-        <div className="bg-indigo-800 hover:text-red-500 text-white font-bold rounded-lg border shadow-lg p-10">
-          This is dummy component
+    <div className="container mx-auto">
+      <ImageSearch searchText={(text) => setTerm(text)} />
+
+      {!isLoading && images.length === 0 && (
+        <h1 className="text-5xl text-center mx-auto mt-32">No Images Found</h1>
+      )}
+
+      {isLoading ? (
+        <h1 className="text-6xl text-center mx-auto mt-32">Loading...</h1>
+      ) : (
+        <div className="grid grid-cols-3 gap-4">
+          {images.map((image) => (
+            <ImageCard key={image.id} image={image} />
+          ))}
         </div>
-      </div>
+      )}
     </div>
   )
 }
